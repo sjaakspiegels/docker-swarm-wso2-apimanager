@@ -50,13 +50,13 @@ The following containers are used to configure the Wso2 configuration.
 | certificates | Generates the certificates used for the communication between the different Wso2 components. |
 
 # Preparation
-# Docker
+## Docker
 ```
 $ docker swarm init
 $ docker network create -d overlay wso2
 ```
 
-# MySql database
+## MySql database
 For data persistence the standard MySql 5.7 image is used.
 In this example the data for the MySql database is located in /var/dockerdata/wso2/mysql. Copy the folder mysql/conf.d and mysql/initdb.d to /var/dockerdata/wso2/mysql/conf.d and /var/dockerdata/wso2/mysql/initdb.d. After this copy the MySql container is ready to be started.
 ```
@@ -67,7 +67,7 @@ $ docker service create -–name mysql –p 3306:3306 -–network=wso2 \
 --constraint "node.role==manager" mysql:5.7
 ```
 
-# HAProxy
+## HAProxy
 A reverse proxy is needed to route traffic to the different services of Wso2. For this setup HAProxy is used. In this example the certificates for the proxy are stored in /var/dockerdata/haproxy/certs.
 ```
 $ docker service create -–name haproxy -–network=wso2 \
@@ -78,16 +78,6 @@ $ docker service create -–name haproxy -–network=wso2 \
 --constraint "node.role==manager" dockercloud/haproxy 
 ```
 
-# Certificates
-The image certificates is used to create the certificates for the intercontainer communication between the Wso2 components. With the following command the certificates are generated and placed in the folder /var/dockerdata/wso2/certificates.
-```
-$ docker run –-rm \
-–v /var/dockerdata/wso2/certificates:/certificates voogd/wso2-certificates:1.0.0 
-```
-
-At start up the Wso2 components will copy the needed certificates in their private java key store.
-
-# Running the Wso2 components
 Because a reverse proxy is used, it is necessary to create DNS entries for the wso2 components. In this example the domain is set to local.com. The following DNS entries must all reference to docker swarm leader.
 
 | DNS Entries |
@@ -100,6 +90,15 @@ Because a reverse proxy is used, it is necessary to create DNS entries for the w
 | Gateway.local.com |
 
 The names given assigned to the wso2 components can not be changed. In the wso2 configuration (docker-files) the containers do reference the other components on this name and the wso2 domain. Because the components are distributed over different swarm nodes using volumes, it is neccesary to use a nfs configuration. In the examples below the variable ip-address must be replaced with the ip-address of the host where the nfs share is running.
+
+## Certificates
+The image certificates is used to create the certificates for the intercontainer communication between the Wso2 components. With the following command the certificates are generated and placed in the folder /var/dockerdata/wso2/certificates.
+```
+$ docker run –-rm \
+–v /var/dockerdata/wso2/certificates:/certificates voogd/wso2-certificates:1.0.0 
+```
+
+At start up the Wso2 components will copy the needed certificates in their private java key store.
 
 ## Api analytics server
 ```
