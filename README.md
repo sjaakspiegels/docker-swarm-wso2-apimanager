@@ -19,12 +19,14 @@ Persistent data is stored in a MySql database.
 The communication between the container is secure. Certificates and java key store are created with the supporting container voogd/certificates:1.0.0. When a container starts it copies the needed certificates in the wso2 security folder.
 
 When a new api is published, the publisher sends a command to the gateway manager. The gatewaymanager stores a xml description of the api to a shared volume and signals the gateways. Triggered by these signals the gateway reads the new api definition.
+In the examples given below server folder is a nfs folder locate on a server with address ip-address. 
+The folder /var/dockerdata/wso2/mediator stores the mediator jar files for the gateway. In the folder /var/dockerdata/wso2/server copy of the wso2 folder /wso2am/repository/deployment/server is stored.
 
 The publisher uses soap communication to the gatewaymanager. This works not very well with the round robin load balancer used in docker swarm. For this reason it recommended to run one gatewaymanager.
 
 Because of the HAProxy there is no need to publish ports in the containers. The HAProxy analyses the dns name and routes the request to the right container.
 
-The analytics server is not shown in this diagram. With an environment in the wso2 container sending analytics data to this server can be switch on or off.
+The analytics server is not shown in this diagram. With an environment (WSO2_CARBON_ANALYTICS) in the wso2 container sending analytics data to this server can be switch on or off.
 
 Logging in the wso2 components is minimized and all logging is redirected to the console.
 
@@ -112,7 +114,7 @@ $ docker service create --name=das --network=wso2 \
 --mount type=volume,volume-opt=o=addr=ip-address,\
 volume-opt=device=:/var/dockerdata/wso2/certificates,\
 volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
---replicas 1 voogd/wso2-identityserver
+--replicas 1 voogd/wso2-analytics:2.0.0
 ```
 
 ## Identity server
@@ -124,10 +126,110 @@ $ docker service create --name=identityserver --network=wso2 \
 -e COOKIE="SRV insert indirect nocache" \
 -e WSO2_ADMIN_PASSWORD="admin" \
 -e WSO2_MYSQL_PASSWORD="AY9VYj74L3FB" \
+-e WSO2_MYSQL_SERVER="mysql" \
+-e WSO2_CARBON_ANALYTICS="true" \
 --mount type=volume,volume-opt=o=addr=ip-address,\
 volume-opt=device=:/var/dockerdata/wso2/certificates,\
 volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
---replicas 1 voogd/wso2-identityserver
+--replicas 1 voogd/wso2-identityserver:5.2.0
 ```
 
-# Traffic manager
+## Publisher
+```
+$ docker service create --name=publisher --network=wso2 \
+-e VIRTUAL_HOST="https:// publisher.local.com" \
+-e SERVICE_PORTS="9443" \
+-e EXTRA_ROUTE_SETTINGS="ssl verify none" \
+-e COOKIE="SRV insert indirect nocache" \
+-e WSO2_ADMIN_PASSWORD="admin" \
+-e WSO2_MYSQL_PASSWORD="AY9VYj74L3FB" \
+-e WSO2_MYSQL_SERVER="mysql" \
+-e WSO2_CARBON_ANALYTICS="true" \
+--mount type=volume,volume-opt=o=addr=addr=ip-address,\
+volume-opt=device=:/var/dockerdata/wso2/mediator,\
+volume-opt=type=nfs,source=vol-wso2-mediator,target=/wso2amserver/mediator \
+--mount type=volume,volume-opt=o=addr=addr=ip-address,\
+volume-opt=device=:/var/dockerdata/wso2/server,\
+volume-opt=type=nfs,source=vol-wso2-deployment-server,target=/wso2am/repository/deployment/server \
+--mount type=volume,volume-opt=o=addr=addr=ip-address,\
+volume-opt=device=:/var/dockerdata/wso2/certificates,\
+volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
+--replicas 1 voogd/wso2-publisher:2.0.0
+```
+
+## Trafficmanager
+```
+$ docker service create --name=trafficmanager --network=wso2 \
+-e VIRTUAL_HOST="https://trafficmanager.local.com" \
+-e SERVICE_PORTS="9443" -e EXTRA_ROUTE_SETTINGS="ssl verify none" \
+-e COOKIE="SRV insert indirect nocache" \
+-e WSO2_ADMIN_PASSWORD="admin2" \
+-e WSO2_MYSQL_PASSWORD="AY9VYj74L3FB" \
+-e WSO2_MYSQL_SERVER="mysql" \
+-e WSO2_CARBON_ANALYTICS="true" \
+--mount type=volume,volume-opt=o=addr=addr=ip-address,\
+volume-opt=device=:/var/dockerdata/wso2/certificates,\
+volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
+--replicas 1 voogd/wso2-trafficmanager:2.0.0
+```
+
+## Store
+```
+$ docker service create --name=store --network=wso2 \
+-e VIRTUAL_HOST="https://store.local.com" \
+-e SERVICE_PORTS="9443" -e EXTRA_ROUTE_SETTINGS="ssl verify none" \
+-e COOKIE="SRV insert indirect nocache" \
+-e WSO2_ADMIN_PASSWORD="admin2" \
+-e WSO2_MYSQL_PASSWORD="AY9VYj74L3FB" \
+-e WSO2_MYSQL_SERVER="mysql" \
+-e WSO2_CARBON_ANALYTICS="true" \
+-e WSO2_GATEWAY_ENDPOINT="https://gateway.local.com" \
+--mount type=volume,volume-opt=o=addr=addr=ip-address,\
+volume-opt=device=:/var/dockerdata/wso2/certificates,\
+volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
+--replicas 1 voogd/wso2-store:2.0.0
+```
+
+## Gateway manager
+```
+$ docker service create --name=gatewaymanager --network=wso2 \
+-e VIRTUAL_HOST="https://gatewaymanager.local.com" \
+-e SERVICE_PORTS="9443" -e EXTRA_ROUTE_SETTINGS="ssl verify none" \
+-e COOKIE="SRV insert indirect nocache" \
+-e WSO2_ADMIN_PASSWORD="admin2" \
+-e WSO2_MYSQL_PASSWORD="AY9VYj74L3FB" \
+-e WSO2_MYSQL_SERVER="mysql" \
+-e WSO2_CARBON_ANALYTICS="true" \
+--mount type=volume,volume-opt=o=addr=addr=ip-address,\
+volume-opt=device=:/var/dockerdata/wso2/mediator,\
+volume-opt=type=nfs,source=vol-wso2-mediator,target=/wso2amserver/mediator \
+--mount type=volume,volume-opt=o=addr=addr=ip-address,\
+volume-opt=device=:/var/dockerdata/wso2/server,\
+volume-opt=type=nfs,source=vol-wso2-deployment-server,target=/wso2am/repository/deployment/server \
+--mount type=volume,volume-opt=o=addr=addr=ip-address,\
+volume-opt=device=:/var/dockerdata/wso2/certificates,\
+volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
+--replicas 1 voogd/wso2-gatewaymanager:2.0.0
+```
+
+## Gateway
+```
+$ docker service create --name=gateway --network=wso2 \
+-e VIRTUAL_HOST="https://gateway.local.com" \
+-e SERVICE_PORTS="8243" -e EXTRA_ROUTE_SETTINGS="ssl verify none" \
+-e COOKIE="SRV insert indirect nocache" \
+-e WSO2_ADMIN_PASSWORD="admin2" \
+-e WSO2_MYSQL_PASSWORD="AY9VYj74L3FB" \
+-e WSO2_MYSQL_SERVER="mysql" \
+-e WSO2_CARBON_ANALYTICS="true" \
+--mount type=volume,volume-opt=o=addr=addr=ip-address,\
+volume-opt=device=:/var/dockerdata/wso2/mediator,\
+volume-opt=type=nfs,source=vol-wso2-mediator,target=/wso2amserver/mediator \
+--mount type=volume,volume-opt=o=addr=addr=ip-address,\
+volume-opt=device=:/var/dockerdata/wso2/server,\
+volume-opt=type=nfs,source=vol-wso2-deployment-server,target=/wso2am/repository/deployment/server \
+--mount type=volume,volume-opt=o=addr=addr=ip-address,\
+volume-opt=device=:/var/dockerdata/wso2/certificates,\
+volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
+--replicas 1 voogd/wso2-gateway:2.0.0
+```
