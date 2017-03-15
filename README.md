@@ -77,6 +77,8 @@ Because a reverse proxy is used, it is necessary to create DNS entries for the w
 | Gatewaymanager.local.com |
 | Gateway.local.com |
 
+The names given assigned to the wso2 components can not be changed. In the wso2 configuration (docker-files) the containers do reference the other components on this name and the wso2 domain. Because the components are distributed over different swarm nodes using volumes, it is neccesary to use a nfs configuration. In the examples below the variable ip-address must be replaced with the ip-address of the host where the nfs share is running.
+
 # Identity server
 ```
 $ docker service create --name=identityserver --network=wso2 \
@@ -86,8 +88,11 @@ $ docker service create --name=identityserver --network=wso2 \
 -e COOKIE="SRV insert indirect nocache" \
 -e WSO2_ADMIN_PASSWORD="admin" \
 -e WSO2_MYSQL_PASSWORD="AY9VYj74L3FB" \
---mount type=volume,volume-opt=o=addr=10.100.31.142,\
+--mount type=volume,volume-opt=o=addr=ip-address,\
 volume-opt=device=:/var/dockerdata/wso2/certificates,\
 volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
 --replicas 1 voogd/wso2-identityserver
 ```
+The configuration dashboard of the identity server is accessible under address https://identityserver.local.com. 
+
+# Traffic manager
