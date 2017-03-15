@@ -8,16 +8,22 @@ This repository will describe and publish our setup of Wso2 api manager with the
     - Must run in Swarm Mode
     - overlay network Wso2 (opt --encrypted)
 
+# Architecture of the solution
+The diagram clarifies the architecture of wso2 docker solution.
+![alt text](https://github.com/sjaakspiegels/docker-swarm-wso2-apimanager/wso2dockerarchitecture.png "Logo Title Text 1")
+
+
 # Used components
 Used versions of Wso2 components
-Components	Version
-apigatewaymanager	2.0.0
-apigateway	2.0.0
-publisher	2.0.0
-store	2.0.0
-trafficmanager	2.0.0
-identityserver	5.2.0
-api-analytics	2.0.0
+| Components | Version |
+| ---------- | ------- |
+| apigatewaymanager | 2.0.0 |
+| apigateway | 2.0.0 |
+| publisher	| 2.0.0 |
+| store	| 2.0.0 |
+| trafficmanager | 2.0.0 |
+| identityserver | 5.2.0 |
+| api-analytics	| 2.0.0 |
 
 # Setup containers
 The following containers are used to configure the Wso2 configuration.
