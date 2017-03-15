@@ -79,7 +79,23 @@ Because a reverse proxy is used, it is necessary to create DNS entries for the w
 
 The names given assigned to the wso2 components can not be changed. In the wso2 configuration (docker-files) the containers do reference the other components on this name and the wso2 domain. Because the components are distributed over different swarm nodes using volumes, it is neccesary to use a nfs configuration. In the examples below the variable ip-address must be replaced with the ip-address of the host where the nfs share is running.
 
-# Identity server
+## Api analytics server
+```
+$ docker service create --name=das --network=wso2 \
+-e VIRTUAL_HOST="https://das.local.com" \
+-e SERVICE_PORTS="9443" \
+-e EXTRA_ROUTE_SETTING="ssl verify nocache" \
+-e WSO2_ADMIN_PASSWORD="admin" \
+-e WSO2_MYSQL_PASSWORD="AY9VYj74L3FB" \
+-e WSO2_MYSQL_SERVER="mysql" \
+--mount type=volume,volume-opt=o=addr=ip-address,\
+volume-opt=device=:/var/dockerdata/wso2/certificates,\
+volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
+--replicas 1 voogd/wso2-identityserver
+```
+
+
+## Identity server
 ```
 $ docker service create --name=identityserver --network=wso2 \
 -e VIRTUAL_HOST="https:// identityserver.local.com" \
