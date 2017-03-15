@@ -3,10 +3,10 @@ Wso2 api manager deployed in docker swarm mode.
 This repository will describe and publish our setup of Wso2 api manager with the identity server and the analytics server in a Docker Swarm. All the Wso2 components will run in separate containers. This will increase scalability and reliability.
 
 # Prerequisites
-*	Ubuntu (16.04 or higher) or RHEL host(s)
-*	Docker v1.13.1 (minimum)
-⋅⋅*	Must run in Swarm Mode
-⋅⋅*	overlay network Wso2 (opt --encrypted)
+-	Ubuntu (16.04 or higher) or RHEL host(s)
+-	Docker v1.13.1 (minimum)
+    - Must run in Swarm Mode
+    - overlay network Wso2 (opt --encrypted)
 
 # Used components
 Used versions of Wso2 components
