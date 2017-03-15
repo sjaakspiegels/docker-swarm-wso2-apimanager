@@ -10,7 +10,8 @@ This repository will describe and publish our setup of Wso2 api manager with the
 
 # Architecture of the solution
 The diagram clarifies the architecture of wso2 docker solution.
-![alt text](https://github.com/sjaakspiegels/docker-swarm-wso2-apimanager/wso2dockerarchitecture.png "Logo Title Text 1")
+![stackflow](https://github.com/sjaakspiegels/docker-swarm-monitoring/master/wso2dockerarchitecture.png "Monitoring Logging Stack")
+![alt text](https://github.com/sjaakspiegels/docker-swarm-wso2-apimanager/wso2dockerarchitecture.png)
 
 
 # Used components
