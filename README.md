@@ -10,12 +10,27 @@ This repository will describe and publish our setup of Wso2 api manager with the
 
 # Architecture of the solution
 The diagram clarifies the architecture of wso2 docker solution.
-![stackflow](https://github.com/sjaakspiegels/docker-swarm-monitoring/master/wso2dockerarchitecture.png "Monitoring Logging Stack")
-![alt text](https://github.com/sjaakspiegels/docker-swarm-wso2-apimanager/wso2dockerarchitecture.png)
+![stackflow](https://github.com/sjaakspiegels/docker-swarm-wso2-apimanager/blob/master/wso2dockerarchitecture.png)
 
+All wso2 components will be deployed in separate containers. The containers are deployed in an overlay network named wso2. This name is fixed because the configuration depends on it. This also applies to the name of the container. These names are also fixed because of the configuration.
+
+Persistent data is stored in a MySql database. 
+
+The communication between the container is secure. Certificates and java key store are created with the supporting container voogd/certificates:1.0.0. When a container starts it copies the needed certificates in the wso2 security folder.
+
+When a new api is published, the publisher sends a command to the gateway manager. The gatewaymanager stores a xml description of the api to a shared volume and signals the gateways. Triggered by these signals the gateway reads the new api definition.
+
+The publisher uses soap communication to the gatewaymanager. This works not very well with the round robin load balancer used in docker swarm. For this reason it recommended to run one gatewaymanager.
+
+Because of the HAProxy there is no need to publish ports in the containers. The HAProxy analyses the dns name and routes the request to the right container.
+
+The analytics server is not shown in this diagram. With an environment in the wso2 container sending analytics data to this server can be switch on or off.
+
+Logging in the wso2 components is minimized and all logging is redirected to the console.
 
 # Used components
-Used versions of Wso2 components
+The images of this solution follow the versioning of the wso2 components.
+
 | Components | Version |
 | ---------- | ------- |
 | apigatewaymanager | 2.0.0 |
@@ -42,7 +57,7 @@ $ docker network create -d overlay wso2
 ```
 
 # MySql database
-For data persistence we used the standard MySql 5.7 image.
+For data persistence the standard MySql 5.7 image is used.
 In this example the data for the MySql database is located in /var/dockerdata/wso2/mysql. Copy the folder mysql/conf.d and mysql/initdb.d to /var/dockerdata/wso2/mysql/conf.d and /var/dockerdata/wso2/mysql/initdb.d. After this copy the MySql container is ready to be started.
 ```
 $ docker service create -–name mysql –p 3306:3306 -–network=wso2 \
@@ -67,7 +82,7 @@ $ docker service create -–name haproxy -–network=wso2 \
 The image certificates is used to create the certificates for the intercontainer communication between the Wso2 components. With the following command the certificates are generated and placed in the folder /var/dockerdata/wso2/certificates.
 ```
 $ docker run –-rm \
-–v /var/dockerdata/wso2/certificates:/certificates Voogd/wso2-certificates:1.0.0 
+–v /var/dockerdata/wso2/certificates:/certificates voogd/wso2-certificates:1.0.0 
 ```
 
 At start up the Wso2 components will copy the needed certificates in their private java key store.
@@ -101,7 +116,6 @@ volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
 --replicas 1 voogd/wso2-identityserver
 ```
 
-
 ## Identity server
 ```
 $ docker service create --name=identityserver --network=wso2 \
@@ -116,6 +130,5 @@ volume-opt=device=:/var/dockerdata/wso2/certificates,\
 volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
 --replicas 1 voogd/wso2-identityserver
 ```
-The configuration dashboard of the identity server is accessible under address https://identityserver.local.com. 
 
 # Traffic manager
