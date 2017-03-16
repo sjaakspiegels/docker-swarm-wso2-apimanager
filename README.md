@@ -26,7 +26,7 @@ The publisher uses soap communication to the gatewaymanager. This works not very
 
 Because of the HAProxy there is no need to publish ports in the containers. The HAProxy analyses the dns name and routes the request to the right container.
 
-The analytics server is not shown in this diagram. With an environment (WSO2_CARBON_ANALYTICS) in the wso2 container sending analytics data to this server can be switch on or off.
+The analytics server is not shown in this diagram. With an environment variable (WSO2_CARBON_ANALYTICS) in the wso2 container, sending analytics data to this server can be switch on or off.
 
 Logging in the wso2 components is minimized and all logging is redirected to the console.
 
