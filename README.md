@@ -265,27 +265,40 @@ volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
 The dependencies between the different images can be clarified with the following tree.
 > wso2-javabase:1.8.0 
 > > > > > > > > > Ubuntu 16.04 with oralce java 1.8.0. Including xmlstarlet, zip, unzip and dnsutils.
+
 > > wso2-apimanager:2.0.0
 > > > > > > > > > Downloads wso2am-2.0.0. Redirects all logging to the console. Configures DASRestApiURL to das.wso2.
+
 > > > wso2-apimysql:2.0.0
 > > > > > > > > > Adds MySql jar and configures database connection to use mysql.
+
 > > > > wso2-gateway:2.0.0
 > > > > > > > > > Runs profile gateway.
+
 > > > > wso2-gatewaymanager:2.0.0
 > > > > > > > > > Runs profile gatewaymanager.
+
 > > > > wso2-publisher:2.0.0
 > > > > > > > > > Runs profile publisher.
+
 > > > > wso2-store:2.0.0
 > > > > > > > > > Runs profile store.
+
 > > > > wso2-trafficmanager:2.0.0
 > > > > > > > > > Runs profile trafficmanager.
+
 > > > > wso2-changepassword:2.0.0
 > > > > > > > > > Changes admin password in the database
+
+> > wso2-analytics:2.0.0
+> > > > > > > > > Downloads wso2am-analytics-2.0.0. 
+
+> > wso2-identityserver:5.2.0
+> > > > > > > > > Downloads wso2is-5.2.0 
+
 > wso2-certificates:1.0.0
+> > > > > > > > > Create passwords for Wso2Containers
 
-
-
-Runs script to find cluster members.
 
 
     
