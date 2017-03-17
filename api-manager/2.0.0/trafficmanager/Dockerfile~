@@ -1,0 +1,16 @@
+# wso2 traffic manager
+FROM voogd/wso2basemysqlsecure
+MAINTAINER Sjaak
+
+RUN mv /wso2am/repository/conf/registry_TM.xml /wso2am/repository/conf/registry.xml && \
+    mv /wso2am/repository/conf/axis2/axis2_TM.xml /wso2am/repository/conf/axis2/axis2.xml && \
+    rm -r -f /wso2am/repository/deployment/server/jaggeryapps/* && \
+    rm -r -f /wso2am/repository/deployment/server/webapps/*
+
+WORKDIR /wso2am/bin
+
+CMD ./wso2server.sh -Dprofile=traffic-manager
+
+
+
+

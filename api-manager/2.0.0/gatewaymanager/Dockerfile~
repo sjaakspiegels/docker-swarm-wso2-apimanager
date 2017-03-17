@@ -1,0 +1,61 @@
+# wso2 gateway manager
+FROM voogd/wso2basemysqlsecure
+MAINTAINER Sjaak
+
+# Axis2.xml EXPERIMENT
+# RUN xmlstarlet edit --inplace \
+#    -s "/axisconfig/transportSender[@name='https']" --type elem -n "parameter" -v 'AllowAll' \
+#    -s '$prev' --type attr -n "name" -v "HostnameVerifier" \
+#    /wso2am/repository/conf/axis2/axis2.xml 
+
+# CORS _RevokeAPI_.xml
+RUN xmlstarlet edit --inplace \
+   -s "/api/handlers" --type elem -n "handler" -v '' \
+   --var handler '$prev' \
+   -s '$handler' --type attr -n "class" -v 'org.wso2.carbon.apimgt.gateway.handler.security.CORSRequestHandler' \
+   -s '$handler' --type elem -n "property" -v '' \
+   --var property '$prev' \
+   -s '$property' --type attr -n "name" -v 'apiImplementationType' \
+   -s '$property' --type attr -n "value" -v 'ENDPOINT' \
+   /wso2am/repository/deployment/server/synapse-configs/default/api/_RevokeAPI_.xml
+
+# CORS _TokenAPI_.xml
+RUN xmlstarlet edit --inplace \
+   -s "/api/handlers" --type elem -n "handler" -v '' \
+   --var handler '$prev' \
+   -s '$handler' --type attr -n "class" -v 'org.wso2.carbon.apimgt.gateway.handler.security.CORSRequestHandler' \
+   -s '$handler' --type elem -n "property" -v '' \
+   --var property '$prev' \
+   -s '$property' --type attr -n "name" -v 'apiImplementationType' \
+   -s '$property' --type attr -n "value" -v 'ENDPOINT' \
+   /wso2am/repository/deployment/server/synapse-configs/default/api/_TokenAPI_.xml
+
+
+# Api-manager.xml
+RUN xmlstarlet edit --inplace \
+    -u "/APIManager/APIKeyValidator/ServerURL" -v "https://keymanager.wso2:9443/services/" \
+    -u "/APIManager/APIKeyValidator/Username" -v "admin" \
+    -u "/APIManager/APIKeyValidator/Password" -v "admin" \
+    -u "/APIManager/APIKeyValidator/KeyValidatorClientType" -v "WSClient" \
+    -u "/APIManager/APIKeyValidator/EnableThriftServer" -v "false" \
+    -u "/APIManager/ThrottlingConfigurations/EnableAdvanceThrottling" -v "false" \
+    -u "/APIManager/ThrottlingConfigurations/DataPublisher/Enabled" -v "true" \
+    -u "/APIManager/ThrottlingConfigurations/DataPublisher/Type" -v "Binary" \
+    -u "/APIManager/ThrottlingConfigurations/DataPublisher/ReceiverUrlGroup" -v "tcp://TrafficManager.wso2:9611" \
+    -u "/APIManager/ThrottlingConfigurations/DataPublisher/AuthUrlGroup" -v "ssl://TrafficManager.wso2:9711" \
+    -u "/APIManager/ThrottlingConfigurations/PolicyDeployer/ServiceURL" -v "https://TrafficManager.wso2:9443/services/" \
+    -u "/APIManager/ThrottlingConfigurations/JMSConnectionDetails/Enabled" -v "false" \
+    -u "/APIManager/ThrottlingConfigurations/JMSConnectionDetails/ServiceURL" -v "tcp://TrafficManager.wso2:5676" \
+    -u "/APIManager/ThrottlingConfigurations/JMSConnectionDetails/Username" -v "admin" \
+    -u "/APIManager/ThrottlingConfigurations/JMSConnectionDetails/Password" -v "admin" \
+    -d "/APIManager/ThrottlingConfigurations/JMSConnectionDetails/JMSConnectionParameters" \
+    -s "/APIManager/JWTConfiguration" --type elem -n "EnableJWTGeneration" -v "true" \
+    -s "/APIManager/JWTConfiguration" --type elem -n "ClaimsRetrieverImplClass" -v  "org.wso2.carbon.apimgt.impl.token.DefaultClaimsRetriever" \
+    -s "/APIManager/JWTConfiguration" --type elem -n "ConsumerDialectURI" -v "http://wso2.org/claims" \
+    -s "/APIManager/JWTConfiguration" --type elem -n "SignatureAlgorithm" -v "NONE" \
+    /wso2am/repository/conf/api-manager.xml 
+
+
+WORKDIR /wso2am/bin
+
+CMD ./wso2server.sh -Dprofile=gateway-manager
