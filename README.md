@@ -261,3 +261,7 @@ volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
 ```
 
 # Technical background 
+
+The dependencies between the different images can be clarified with the following tree.
+    - java:1.8.0 '>' tets
+    
