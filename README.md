@@ -102,6 +102,25 @@ $ docker run –-rm \
 
 At start up the Wso2 components will copy the needed certificates in their private java key store.
 
+# WSO2 configuration variables
+With the following environment variables the configuration of the WSO2 containers can be changed.
+
+| Variable | Description |
+| -------- | ----------- |
+| VIRTUAL_HOST | DNS name of the service. This name is used by HAProxy. |
+| SERVICE_PORTS | This port is used by HAProxy to communicate to the container. |
+| EXTRA_ROUTE_SETTING | Route setting used by HAProxy to access the container. |
+| WSO2_ADMIN_PASSWORD | Password of the WSO2 administrator. This password is use for communication between WSO2 containers. With the container changeadminpassword this password can be changed. |
+| WSO2_MYSQL_PASSWORD | MySql password for the user apisqluser. |
+| WSO2_DAS_APIM_INCREMENTAL_PROCESSING_SCRIPT | Cron schedule for the analytic server task. |
+| WSO2_DAS_APIM_LAST_ACCESS_TIME_SCRIPT | Cron schedule for the analytic server task. |
+| WSO2_DAS_APIM_LATENCY_BREAKDOWN_STATS | Cron schedule for the analytic server task. |
+| WSO2_DAS_APIM_LOGANALYZER_SCRIPT | Cron schedule for the analytic server task. |
+| WSO2_DAS_APIM_STAT_SCRIPT | Cron schedule for the analytic server task. |
+| WSO2_DAS_APIM_STAT_SCRIPT_THROTTLE | Cron schedule for the analytic server task. |
+| WSO2_DAS_APIM_USER_AGENT_STATS | Cron schedule for the analytic server task. |
+| WSO2_CARBON_ANALYTICS | Enable or disable send analytics information to the analytic server. |
+
 ## Api analytics server
 ```
 $ docker service create --name=das --network=wso2 \
@@ -111,10 +130,17 @@ $ docker service create --name=das --network=wso2 \
 -e WSO2_ADMIN_PASSWORD="admin" \
 -e WSO2_MYSQL_PASSWORD="AY9VYj74L3FB" \
 -e WSO2_MYSQL_SERVER="mysql" \
+-e WSO2_DAS_APIM_INCREMENTAL_PROCESSING_SCRIPT="0 0/2 * 1/1 * ?" \
+-e WSO2_DAS_APIM_LAST_ACCESS_TIME_SCRIPT="0 1/15 * 1/1 * ? *" \
+-e WSO2_DAS_APIM_LATENCY_BREAKDOWN_STATS="0 5/15 * 1/1 * ? *" \
+-e WSO2_DAS_APIM_LOGANALYZER_SCRIPT="0 0/15 * 1/1 * ? 2030" \
+-e WSO2_DAS_APIM_STAT_SCRIPT="0 9/15 * 1/1 * ? *" \
+-e WSO2_DAS_APIM_STAT_SCRIPT_THROTTLE="0 0/5 * 1/1 * ? 2030" \
+-e WSO2_DAS_APIM_USER_AGENT_STATS="0 11/15 * 1/1 * ? *" \
 --mount type=volume,volume-opt=o=addr=ip-address,\
 volume-opt=device=:/var/dockerdata/wso2/certificates,\
 volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
---replicas 1 voogd/wso2-analytics:2.0.0
+--replicas 1 sspiegels/wso2-analytics:2.0.0
 ```
 
 ## Identity server
@@ -131,7 +157,7 @@ $ docker service create --name=identityserver --network=wso2 \
 --mount type=volume,volume-opt=o=addr=ip-address,\
 volume-opt=device=:/var/dockerdata/wso2/certificates,\
 volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
---replicas 1 voogd/wso2-identityserver:5.2.0
+--replicas 1 sspiegels/wso2-identityserver:5.2.0
 ```
 
 ## Publisher
@@ -154,7 +180,7 @@ volume-opt=type=nfs,source=vol-wso2-deployment-server,target=/wso2am/repository/
 --mount type=volume,volume-opt=o=addr=addr=ip-address,\
 volume-opt=device=:/var/dockerdata/wso2/certificates,\
 volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
---replicas 1 voogd/wso2-publisher:2.0.0
+--replicas 1 sspiegels/wso2-publisher:2.0.0
 ```
 
 ## Trafficmanager
@@ -170,7 +196,7 @@ $ docker service create --name=trafficmanager --network=wso2 \
 --mount type=volume,volume-opt=o=addr=addr=ip-address,\
 volume-opt=device=:/var/dockerdata/wso2/certificates,\
 volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
---replicas 1 voogd/wso2-trafficmanager:2.0.0
+--replicas 1 sspiegels/wso2-trafficmanager:2.0.0
 ```
 
 ## Store
@@ -187,7 +213,7 @@ $ docker service create --name=store --network=wso2 \
 --mount type=volume,volume-opt=o=addr=addr=ip-address,\
 volume-opt=device=:/var/dockerdata/wso2/certificates,\
 volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
---replicas 1 voogd/wso2-store:2.0.0
+--replicas 1 sspiegels/wso2-store:2.0.0
 ```
 
 ## Gateway manager
@@ -209,7 +235,7 @@ volume-opt=type=nfs,source=vol-wso2-deployment-server,target=/wso2am/repository/
 --mount type=volume,volume-opt=o=addr=addr=ip-address,\
 volume-opt=device=:/var/dockerdata/wso2/certificates,\
 volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
---replicas 1 voogd/wso2-gatewaymanager:2.0.0
+--replicas 1 sspiegels/wso2-gatewaymanager:2.0.0
 ```
 
 ## Gateway
@@ -231,5 +257,7 @@ volume-opt=type=nfs,source=vol-wso2-deployment-server,target=/wso2am/repository/
 --mount type=volume,volume-opt=o=addr=addr=ip-address,\
 volume-opt=device=:/var/dockerdata/wso2/certificates,\
 volume-opt=type=nfs,source=vol-wso2-certificates,target=/certificates \
---replicas 1 voogd/wso2-gateway:2.0.0
+--replicas 2 sspiegels/wso2-gateway:2.0.0
 ```
+
+# Technical background 
